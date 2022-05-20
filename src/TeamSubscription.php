@@ -29,11 +29,23 @@ class TeamSubscription extends CashierSubscription
     }
 
     /**
-     * Get the team that owns the subscription.
+     * Get the model related to the subscription.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user()
+    public function owner()
     {
         return $this->belongsTo(Spark::teamModel(), 'team_id');
+    }
+
+    /**
+     * Get the subscription items related to the subscription.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function items()
+    {
+        return $this->hasMany(TeamSubscriptionItem::class, 'subscription_id');
     }
 
     /**
@@ -43,6 +55,6 @@ class TeamSubscription extends CashierSubscription
      */
     public function getProviderPlanAttribute()
     {
-        return $this->stripe_plan;
+        return $this->stripe_price;
     }
 }

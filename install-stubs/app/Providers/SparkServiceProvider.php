@@ -44,12 +44,14 @@ class SparkServiceProvider extends ServiceProvider
     protected $usesApi = true;
 
     /**
-     * Finish configuring Spark for the application.
+     * Bootstrap any application services.
      *
      * @return void
      */
-    public function booted()
+    public function boot()
     {
+        parent::boot();
+
         Spark::noCardUpFront()->trialDays(10);
 
         Spark::freePlan()
@@ -62,5 +64,15 @@ class SparkServiceProvider extends ServiceProvider
             ->features([
                 'First', 'Second', 'Third'
             ]);
+    }
+
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        parent::register();
     }
 }

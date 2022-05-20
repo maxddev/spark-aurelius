@@ -28,6 +28,7 @@ trait ProvidesScriptVariables
             'env' => config('app.env'),
             'roles' => Spark::roles(),
             'state' => Spark::call(InitialFrontendState::class.'@forUser', [Auth::user()]),
+            'stripeApiVersion' => Cashier::STRIPE_VERSION,
             'stripeKey' => config('cashier.key'),
             'cashierPath' => config('cashier.path'),
             'teamsPrefix' => Spark::teamsPrefix(),
@@ -52,10 +53,10 @@ trait ProvidesScriptVariables
      */
     private static function getTranslations()
     {
-        $translationFile = resource_path('lang/'.app()->getLocale().'.json');
+        $translationFile = base_path('lang/'.app()->getLocale().'.json');
 
         if (! is_readable($translationFile)) {
-            $translationFile = resource_path('lang/'.app('translator')->getFallback().'.json');
+            $translationFile = base_path('lang/'.app('translator')->getFallback().'.json');
         }
 
         return json_decode(file_get_contents($translationFile), true);

@@ -39,6 +39,7 @@
 
                                         <div class="col-md-6">
                                             <div id="card-element"></div>
+                                            <input type="hidden" class="form-control" :class="{'is-invalid': cardForm.errors.has('card')}">
                                             <span class="invalid-feedback" v-show="cardForm.errors.has('card')">
                                             @{{ cardForm.errors.get('card') }}
                                         </span>
@@ -84,6 +85,7 @@
                                                     <input type="checkbox" class="form-check-input" v-model="registerForm.terms">
                                                     {!! __('I Accept :linkOpen The Terms Of Service :linkClose', ['linkOpen' => '<a href="/terms" target="_blank">', 'linkClose' => '</a>']) !!}
                                                 </label>
+                                                <input type="hidden" class="form-control" :class="{'is-invalid': registerForm.errors.has('terms')}">
                                                 <span class="invalid-feedback" v-show="registerForm.errors.has('terms')">
                                                 <strong>@{{ registerForm.errors.get('terms') }}</strong>
                                             </span>

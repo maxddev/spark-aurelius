@@ -17,9 +17,9 @@ class CreateSparkSubscriptionsTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('name');
             $table->string('stripe_id');
-            $table->string('stripe_plan');
+            $table->string('stripe_price')->nullable();
             $table->string('stripe_status')->nullable();
-            $table->integer('quantity');
+            $table->integer('quantity')->nullable();
             $table->timestamp('trial_ends_at')->nullable();
             $table->timestamp('ends_at')->nullable();
             $table->timestamps();
@@ -30,12 +30,36 @@ class CreateSparkSubscriptionsTable extends Migration
             $table->unsignedBigInteger('team_id');
             $table->string('name');
             $table->string('stripe_id');
-            $table->string('stripe_plan');
+            $table->string('stripe_price')->nullable();
             $table->string('stripe_status')->nullable();
-            $table->integer('quantity');
+            $table->integer('quantity')->nullable();
             $table->timestamp('trial_ends_at')->nullable();
             $table->timestamp('ends_at')->nullable();
             $table->timestamps();
+        });
+
+        Schema::create('subscription_items', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('subscription_id');
+            $table->string('stripe_id')->index();
+            $table->string('stripe_product')->nullable();
+            $table->string('stripe_price');
+            $table->integer('quantity');
+            $table->timestamps();
+
+            $table->unique(['subscription_id', 'stripe_price']);
+        });
+
+        Schema::create('team_subscription_items', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('subscription_id');
+            $table->string('stripe_id')->index();
+            $table->string('stripe_product')->nullable();
+            $table->string('stripe_price');
+            $table->integer('quantity');
+            $table->timestamps();
+
+            $table->unique(['subscription_id', 'stripe_price']);
         });
     }
 
@@ -48,5 +72,7 @@ class CreateSparkSubscriptionsTable extends Migration
     {
         Schema::drop('subscriptions');
         Schema::drop('team_subscriptions');
+        Schema::drop('subscription_items');
+        Schema::drop('team_subscription_items');
     }
 }

@@ -39,10 +39,11 @@
 
                     <!-- Card Details -->
                     <div class="form-group row" v-show="form.use_existing_payment_method != '1'">
-                        <label for="name" class="col-md-4 col-form-label text-md-right">{{__('Card')}}</label>
+                        <label for="subscription-card-element" class="col-md-4 col-form-label text-md-right">{{__('Card')}}</label>
 
                         <div class="col-md-6">
                             <div id="subscription-card-element"></div>
+                            <input type="hidden" class="form-control" :class="{'is-invalid': cardForm.errors.has('card')}">
                             <span class="invalid-feedback" v-show="cardForm.errors.has('card')">
                                 @{{ cardForm.errors.get('card') }}
                             </span>

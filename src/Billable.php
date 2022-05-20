@@ -3,6 +3,7 @@
 namespace Laravel\Spark;
 
 use Illuminate\Support\Facades\Cache;
+use Laravel\Cashier\Cashier;
 use Mpociot\VatCalculator\VatCalculator;
 use Laravel\Cashier\Billable as CashierBillable;
 
@@ -90,10 +91,14 @@ trait Billable
             return;
         }
 
-        if (Spark::prorates()) {
+        if (! is_null(Spark::prorationBehaviour())) {
+            $subscription->setProrationBehavior(
+                Spark::prorationBehaviour()
+            )->incrementQuantity($count);
+        } elseif (Spark::prorates()) {
             $subscription->incrementAndInvoice($count);
         } else {
-            $subscription->noProrate()->incrementAndInvoice($count);
+            $subscription->noProrate()->incrementQuantity($count);
         }
     }
 
@@ -118,7 +123,11 @@ trait Billable
             return;
         }
 
-        if (Spark::prorates()) {
+        if (! is_null(Spark::prorationBehaviour())) {
+            $subscription->setProrationBehavior(
+                Spark::prorationBehaviour()
+            )->decrementQuantity($count);
+        } elseif (Spark::prorates()) {
             $subscription->decrementQuantity($count);
         } else {
             $subscription->noProrate()->decrementQuantity($count);
@@ -146,14 +155,26 @@ trait Billable
             return;
         }
 
-        if (! Spark::prorates()) {
-            $subscription = $subscription->noProrate();
-        }
-
         if ($count > $subscription->quantity) {
-            $subscription->incrementAndInvoice($count - $subscription->quantity);
+            if (! is_null(Spark::prorationBehaviour())) {
+                $subscription->setProrationBehavior(
+                    Spark::prorationBehaviour()
+                )->incrementQuantity($count - $subscription->quantity);
+            } elseif (Spark::prorates()) {
+                $subscription->incrementAndInvoice($count - $subscription->quantity);
+            } else {
+                $subscription->noProrate()->incrementQuantity($count - $subscription->quantity);
+            }
         } elseif ($count < $subscription->quantity) {
-            $subscription->decrementQuantity($subscription->quantity - $count);
+            if (! is_null(Spark::prorationBehaviour())) {
+                $subscription->setProrationBehavior(
+                    Spark::prorationBehaviour()
+                )->decrementQuantity($subscription->quantity - $count);
+            } elseif (Spark::prorates()) {
+                $subscription->decrementQuantity($subscription->quantity - $count);
+            } else {
+                $subscription->noProrate()->decrementQuantity($subscription->quantity - $count);
+            }
         }
     }
 
@@ -201,5 +222,34 @@ trait Billable
                     $this->billing_country, $this->billing_zip, $isValidVAT
                 ) * 100;
         });
+    }
+
+    /**
+     * Get the tax rates to apply to the subscription.
+     *
+     * @return array
+     */
+    public function taxRates()
+    {
+        if (! $rate = $this->taxPercentage()) {
+            return null;
+        }
+
+        if ($existing = TaxRate::where('percentage', $rate)->first()) {
+            return [$existing->stripe_id];
+        }
+
+        $stripeTaxRate = Cashier::stripe()->taxRates->create([
+            'display_name' => 'VAT',
+            'inclusive' => false,
+            'percentage' => $rate,
+        ]);
+
+        TaxRate::create([
+            'stripe_id' => $stripeTaxRate->id,
+            'percentage' => $rate,
+        ]);
+
+        return [$stripeTaxRate->id];
     }
 }
