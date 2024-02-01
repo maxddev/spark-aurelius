@@ -37,7 +37,7 @@ class RegisterRequest extends FormRequest
             return $this->plan() && $this->plan()->price > 0;
         });
 
-        return $this->after($validator);
+        return $this->afterValidation($validator);
     }
 
     /**
@@ -66,7 +66,7 @@ class RegisterRequest extends FormRequest
      * @param  \Illuminate\Validation\Validator  $validator
      * @return \Illuminate\Validation\Validator
      */
-    protected function after($validator)
+    protected function afterValidation($validator)
     {
         return $validator->after(function ($validator) {
             if ($this->coupon) {
