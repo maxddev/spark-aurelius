@@ -6,7 +6,7 @@ module.exports = {
         require('./../mixins/register'),
         require('./../mixins/plans'),
         require('./../mixins/vat'),
-        require('./../mixins/stripe')
+        //require('./../mixins/stripe')
     ],
 
 
@@ -164,39 +164,7 @@ module.exports = {
             this.registerForm.busy = true;
             this.registerForm.errors.forget();
 
-            if ( ! Spark.cardUpFront || this.registerForm.invitation || this.selectedPlan.price === 0) {
-                return this.sendRegistration();
-            }
-
-            const payload = {
-                name: this.cardForm.name,
-                address: {
-                    line1: this.registerForm.address || '',
-                    line2: this.registerForm.address_line_2 || '',
-                    city: this.registerForm.city || '',
-                    state: this.registerForm.state || '',
-                    postal_code: this.registerForm.zip || '',
-                    country: this.registerForm.country || '',
-                }
-            };
-
-            this.generateToken(secret => {
-                this.stripe.handleCardSetup(secret, this.cardElement, {
-                    payment_method_data: {
-                        billing_details: payload
-                    }
-                }).then(response => {
-                    if (response.error) {
-                        this.cardForm.errors.set({card: [
-                                response.error.message
-                            ]});
-
-                        this.registerForm.busy = false;
-                    } else {
-                        this.sendRegistration(response.setupIntent.payment_method);
-                    }
-                });
-            });
+            return this.sendRegistration();
         },
 
 
