@@ -16,7 +16,7 @@
         "erusev/parsedown": "~1.0",
         "firebase/php-jwt": "~4.0|~5.0",
         "intervention/image": "^2.3",
-        "laravel/cashier": "^15.0"
+        "laravel/cashier": "^13.0"
     },
     "require-dev": {
         "mpociot/vat-calculator": "^1.6"
